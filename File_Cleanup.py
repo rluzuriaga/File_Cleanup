@@ -1,3 +1,5 @@
+import time
+start_time = time.time()
 """
 Author: Rodrigo Luzuriaga
 Date started: 01/04/2017
@@ -13,10 +15,10 @@ import os
 import shutil
 from time import sleep
 
-search_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/aaa/'  # If working on Windows, insert directory location like this line
+search_directory = 'C:/Users/RodrigoLuzuriaga/Downloads'  # If working on Windows, insert directory location like this line
 # search_directory = '/home/ubuntu/workspace/testdir'  # This is the directory that you want to read from. Only change what is inside the ' '
 
-clean_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/bbb/'
+clean_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/downloads/'
 # clean_directory = '/home/ubuntu/workspace/clean/'  # This is the directory that you want to move the files to. In this directory the script will create all the necesary folders and copy over the files
 
 map_file_path = 'C:/Users/RodrigoLuzuriaga/Desktop/map.txt'
@@ -148,3 +150,6 @@ map_file_write.close()
 
 # TODO: Make script detect if the file name already has a number in parentheses so that it names it in a different way.
 # TODO: Check for repeated files and delete if needed (maybe make a prompt to appear to ask user) use the os.stat().st_size function to check for size if two files match the same size etc.
+
+
+print(time.time() - start_time)

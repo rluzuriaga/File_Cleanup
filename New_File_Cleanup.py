@@ -1,3 +1,5 @@
+# import time
+# start_time = time.time()
 """
 Author: Rodrigo Luzuriaga
 Date Started: 01/04/2017
@@ -13,19 +15,19 @@ import os
 import shutil
 
 
-def lists_creation(file_path, search_directory, list_of_original_path, list_of_file_names):
+def lists_creation(file_path, directory_to_original_files, list_of_original_path, list_of_file_names):
 	"""
 
 	:param file_path:
-	:param search_directory:
+	:param directory_to_original_files:
 	:param list_of_original_path:
 	:param list_of_file_names:
 	:return:
 	"""
 
-	map_file_write = open(file_path, 'w')
+	opened_map_file = open(file_path, 'w')
 
-	for folderName, subFolder, fileNames in os.walk(search_directory):
+	for folderName, subFolder, fileNames in os.walk(directory_to_original_files):
 		for fileName in fileNames:
 			if folderName in fileNames:
 				pass
@@ -33,23 +35,25 @@ def lists_creation(file_path, search_directory, list_of_original_path, list_of_f
 				list_of_original_path.append(folderName + "/")
 				list_of_file_names.append(fileName)
 
-	return map_file_write
+	return opened_map_file
 
 
-def destination_path_creation(file_name, clean_directory):
+def destination_path_creation(listed_file_name, writing_to_directory):
 	"""
 
-	:param file_name:
-	:param clean_directory:
+	:param listed_file_name:
+	:param writing_to_directory:
 	:return:
 	"""
 
-	if file_name[-3] == ".":
-		destination_path = clean_directory + file_name[-2:]
-	elif file_name[-4] == ".":
-		destination_path = clean_directory + file_name[-3:]
-	elif file_name[-5] == ".":
-		destination_path = clean_directory + file_name[-4:]
+	destination_path = ""
+
+	if listed_file_name[-3] == ".":
+		destination_path = writing_to_directory + listed_file_name[-2:]
+	elif listed_file_name[-4] == ".":
+		destination_path = writing_to_directory + listed_file_name[-3:]
+	elif listed_file_name[-5] == ".":
+		destination_path = writing_to_directory + listed_file_name[-4:]
 
 	if not os.path.exists(destination_path):
 		os.makedirs(destination_path)
@@ -57,59 +61,105 @@ def destination_path_creation(file_name, clean_directory):
 	return destination_path
 
 
-"""
-def file_renamer(file_name, counter, m_f_n):
-	r_m_f_n = ""  # Since this function is recursive, this variable has to be created to be the output of the recursive part of the function
+def file_renamer(destination_path, listed_file_name, counter, modified_file_name):
+	"""
 
-	file_name_no_ext = file_name.split(".", 1)[0]  # Creates variable that only holds the file name without the file extension
+	:param destination_path:
+	:param listed_file_name:
+	:param counter:
+	:param modified_file_name:
+	:return:
+	"""
+	recurred_modified_file_name = ""
 
-	file_name_ext = file_name.split(".", 1)[1]  # Creates variable that holds the file name extension
+	file_name_no_ext = listed_file_name.split(".", 1)[0]
 
-	new_file_name = file_name_no_ext + "(" + str(counter) + ")" + "." + file_name_ext  # Creates the new file name that adds the file name without the extension and a number starting from 0 in paranthesis and then adds the the file extension after a dot
+	file_name_ext = listed_file_name.split(".", 1)[1]
+
+	new_file_name = file_name_no_ext + "(" + str(counter) + ")" + "." + file_name_ext
 
 	counter += 1
 
-
-	if os.path.exists(destination_path + "/" + new_file_name):  # Checks if this new file name is already in the new directory
-
-		r_m_f_n = file_renamer(file_name, counter, m_f_n)  # Runs the function again using the original file name and the new number that is incremented by one every time this function runs
-															# If this function runs (inside the actual function) then it outputs a variable that is checked bellow
+	if os.path.exists(destination_path + "/" + new_file_name):
+		recurred_modified_file_name = file_renamer(destination_path, listed_file_name, counter, modified_file_name)
 
 	try:
 		shutil.move(destination_path + "/" + file_name, destination_path + "/" + new_file_name)
-	except IOError:  # The only time that the IOError exception should happen is when the shutil.move() function is trying to rename a file that is not there.
-		pass  # If the exception does happen, then the current state of the for loop ends
+	except IOError:
+		pass
 
-	if r_m_f_n == "":  # Checks if the function only ran once, if it ran once then the variable is an empty string
-		m_f_n = new_file_name  # When the function only runs once then the variable that will be returned will be the new_file_name
-	else:  # If the the function is ran more than once then the output of the second (or above) time the function is ran will be returned
-		m_f_n = r_m_f_n
+	if recurred_modified_file_name == "":
+		modified_file_name = new_file_name
+	else:
+		modified_file_name = recurred_modified_file_name
 
-	return m_f_n
-"""
+	return modified_file_name
 
+
+def keeping_old_files_decision(keep_old_files, destination_path):
+	"""
+
+	:param keep_old_files:
+	:param destination_path:
+	:return:
+	"""
+	if not keep_old_files:
+		shutil.copy2(full_path + file_name, destination_path)
+	elif keep_old_files:
+		shutil.move(full_path + file_name, destination_path)
+	else:
+		print("Please make the variable 'remove_old_files_after_move' either True or False.\n")
+
+
+def map_file_writer(modified_file_name, listed_file_name, map_file_write, destination_path):
+	"""
+
+	:param modified_file_name:
+	:param listed_file_name:
+	:param map_file_write:
+	:param destination_path:
+	:return:
+	"""
+	try:
+		if modified_file_name == "":
+			modified_file_name = listed_file_name
+	except NameError:
+		modified_file_name = listed_file_name
+
+	map_file_write.write(
+		"Moving:  " + full_path + file_name + "  --  To:  " + destination_path + "/" + modified_file_name + "\n\n")
 
 
 if __name__ == "__main__":
 
-	search_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/aaa/'  # If working on Windows, insert directory location like this line
-	# search_directory = '/home/ubuntu/workspace/testdir'  # This is the directory that you want to read from. Only change what is inside the ' '
+	search_directory = 'C:/Users/RodrigoLuzuriaga/Downloads/'
 
-	clean_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/bbb/'
-	# clean_directory = '/home/ubuntu/workspace/clean/'  # This is the directory that you want to move the files to. In this directory the script will create all the necesary folders and copy over the files
+	clean_directory = 'C:/Users/RodrigoLuzuriaga/Desktop/downloads/'
 
 	map_file_path = 'C:/Users/RodrigoLuzuriaga/Desktop/map.txt'
-	# map_file_path = "/home/ubuntu/workspace/clean/map.txt"
 
-	remove_old_files_after_move = False  # For a lack of a better variable name, this just decides if the files are moved or copied
-										# Make this variable False if you want the files to be copied (meaning it keeps the original files in place)
-										# Make this variable True if you want the file to be moved (meaning they will be removed from the original place)
+	remove_old_files_after_move = False
 
 	full_name_list = []
 
 	file_name_list = []
 
-	map_file_write = lists_creation(map_file_path, search_directory, full_name_list, file_name_list)
+	map_file = lists_creation(map_file_path, search_directory, full_name_list, file_name_list)
 
 	for full_path, file_name in zip(full_name_list, file_name_list):
 		counter = 1
+
+		full_path_of_destination = destination_path_creation(file_name, clean_directory)
+
+		modified_file_name = ""
+
+		if os.path.exists(full_path_of_destination + "/" + file_name):
+			modified_file_name = file_renamer(full_path_of_destination, file_name, counter, modified_file_name)
+
+		keeping_old_files_decision(remove_old_files_after_move, full_path_of_destination)
+
+		map_file_writer(modified_file_name, file_name, map_file, full_path_of_destination)
+
+	map_file.close()
+
+# print(time.time() - start_time)
